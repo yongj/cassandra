@@ -185,7 +185,7 @@ public final class JsonTransformer
         try
         {
             json.writeStartObject();
-            
+
             json.writeFieldName("partition");
             json.writeStartObject();
             json.writeFieldName("key");
@@ -349,8 +349,7 @@ public final class JsonTransformer
                 }
                 else
                 {
-                    AbstractType<?> type = column.cellValueType();
-                    json.writeRawValue(type.toJSONString(clustering.get(i), Server.CURRENT_VERSION));
+                    json.writeRawValue(column.cellValueType().toJSONString(clustering.get(i), Server.CURRENT_VERSION));
                 }
             }
             json.writeEndArray();
