@@ -264,10 +264,25 @@ public abstract class AbstractCompositeType extends AbstractType<ByteBuffer>
     }
 
     @Override
-    public String toJSONString(ByteBuffer buffer, ProtocolVersion protocolVersion)
+    public String toJSONString(ByteBuffer bb, ProtocolVersion protocolVersion)
     {
-        //TODO suport toJSONString for AbstractCompositeType
-        throw new UnsupportedOperationException();
+        StringBuilder sb = new StringBuilder();
+        boolean isStatic = readIsStatic(bb, ByteBufferAccessor.instance);
+        int offset = startingOffset(isStatic);
+
+        int i = 0;
+        while (!ByteBufferAccessor.instance.isEmptyFromOffset(bb, offset))
+        {
+            if (i != 0)
+                sb.append(", ");
+            AbstractType<?> comparator = getAndAppendComparator(i, bb, ByteBufferAccessor.instance, sb, offset);
+            offset += getComparatorSize(i++, bb, ByteBufferAccessor.instance, offset);
+            ByteBuffer value = ByteBufferAccessor.instance.sliceWithShortLength(bb, offset);
+            offset += ByteBufferAccessor.instance.sizeWithShortLength(value);
+            sb.append('"' + escape(comparator.getString(value, ByteBufferAccessor.instance)) + '"');
+            offset++; // skip end-of-component
+        }
+        return sb.toString();
     }
 
     @Override
